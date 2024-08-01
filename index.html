@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Cloud Arcade</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #4285F4, #34A853, #FBBC05, #EA4335);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 3em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        h2 {
+            font-weight: 300;
+            margin: 10px 0;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #fff;
+            color: #4285F4;
+            border: none;
+            border-radius: 25px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .btn:hover {
+            background-color: #4285F4;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: #4285F4;
+            color: white;
+            font-weight: 500;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .rank {
+            font-weight: bold;
+            color: #34A853;
+        }
+        #emailInput {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        #userDetails {
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: #4285F4;
+        }
+        .emoji {
+            margin-right: 5px;
+        }
+        .nav-btn {
+            background-color: #FBBC05;
+            color: white;
+            margin-top: 20px;
+        }
+        .nav-btn:hover {
+            background-color: #F9AB00;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Google Cloud Arcade</h1>
+            <h2>Facilitators: Rinesh Patil and Yash Ingole</h2>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="mainPage">
+            <div class="btn-container">
+                <button class="btn" onclick="showSection('knowYourDetails')">
+                    <span class="emoji">👤</span> Know Your Details
+                </button>
+                <button class="btn" onclick="showSection('leaderboards')">
+                    <span class="emoji">🏆</span> Leaderboards
+                </button>
+            </div>
+        </div>
+
+        <div id="knowYourDetails" class="card hidden">
+            <h2><span class="emoji">🔍</span> Know Your Details</h2>
+            <input type="email" id="emailInput" placeholder="Enter your email">
+            <button class="btn" onclick="fetchUserDetails()">
+                <span class="emoji">🔎</span> Submit
+            </button>
+            <div id="userDetails"></div>
+            <button class="btn nav-btn" onclick="showSection('mainPage')">
+                <span class="emoji">🏠</span> Back to Home
+            </button>
+        </div>
+
+        <div id="leaderboards" class="card hidden">
+            <h2><span class="emoji">🥇</span> Leaderboards</h2>
+            <div id="leaderboardLoading" class="loading">
+                <span class="emoji">⏳</span> Loading leaderboard...
+            </div>
+            <button class="btn nav-btn" onclick="showSection('mainPage')">
+                <span class="emoji">🏠</span> Back to Home
+            </button>
+            <table id="leaderboardTable" class="hidden">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>User Name</th>
+                        <th>Skill Badges</th>
+                        <th>Arcade Games</th>
+                        <th>Trivia Games</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Leaderboard data will be inserted here -->
+                </tbody>
+            </table>
+           
+        </div>
+    </div>
+
+    <script>
+        let userData = [];
+
+        async function fetchCSVData() {
+            try {
+                document.getElementById('leaderboardLoading').classList.remove('hidden');
+                document.getElementById('leaderboardTable').classList.add('hidden');
+                
+                const response = await fetch('arcadedata.csv');
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    complete: function(results) {
+                        userData = results.data;
+                        document.getElementById('leaderboardLoading').classList.add('hidden');
+                        document.getElementById('leaderboardTable').classList.remove('hidden');
+                        populateLeaderboard();
+                    },
+                    error: function(error) {
+                        console.error('Error parsing CSV:', error);
+                        document.getElementById('leaderboardLoading').textContent = 'Error loading leaderboard. Please try again later.';
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching CSV data:', error);
+                document.getElementById('leaderboardLoading').textContent = 'Error loading leaderboard. Please try again later.';
+            }
+        }
+
+        function showSection(sectionId) {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('knowYourDetails').classList.add('hidden');
+            document.getElementById('leaderboards').classList.add('hidden');
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById(sectionId).classList.add('fadeIn');
+            
+            if (sectionId === 'leaderboards' && userData.length === 0) {
+                fetchCSVData();
+            }
+        }
+
+        function populateLeaderboard() {
+            userData.sort((a, b) => b['# of Skill Badges Completed'] - a['# of Skill Badges Completed']);
+
+            const leaderboardBody = document.querySelector("#leaderboardTable tbody");
+            leaderboardBody.innerHTML = '';
+            userData.forEach((user, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="rank">${index + 1}</td>
+                    <td>${user['User Name']}</td>
+                    <td>${user['# of Skill Badges Completed']}</td>
+                    <td>${user['# of Arcade Games Completed']}</td>
+                    <td>${user['# of Trivia Games Completed']}</td>
+                `;
+                leaderboardBody.appendChild(row);
+            });
+        }
+
+        function fetchUserDetails() {
+            const email = document.getElementById('emailInput').value;
+            const user = userData.find(u => u['User Email'] === email);
+            const userDetailsDiv = document.getElementById('userDetails');
+            
+            if (user) {
+                userDetailsDiv.innerHTML = `
+                    <div class="card fadeIn">
+                        <h3>${user['User Name']}</h3>
+                        <p><span class="emoji">🏅</span> Skill Badges Completed: ${user['# of Skill Badges Completed']}</p>
+                        <p><span class="emoji">🎮</span> Arcade Games Completed: ${user['# of Arcade Games Completed']}</p>
+                        <p><span class="emoji">❓</span> Trivia Games Completed: ${user['# of Trivia Games Completed']}</p>
+                        <p><span class="emoji">🏆</span> Milestone Earned: ${user['Milestone Earned']}</p>
+                        <p><span class="emoji">👤</span> Profile URL: <a href="${user['Google Cloud Skills Boost Profile URL']}" target="_blank">View Profile</a></p>
+                    </div>
+                `;
+            } else {
+                userDetailsDiv.innerHTML = '<p class="card fadeIn">User not found. Please check the email and try again.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
